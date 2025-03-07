@@ -3,6 +3,30 @@ const uuid = require('uuid');
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours.json`));
 
+
+const checkId = (req, res, next, val) => {
+    console.log(val);
+    console.log('-------------------------');
+    const { id } = req.params;
+    const tour = tours.find(el => el._id === id);
+    if (!tour) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Invalid ID"
+        })
+    }
+    next();
+}
+
+const checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) {
+        return res.status(400).json({
+            status: "fail",
+            message: "Missing name or price"
+        })
+    }
+    next();
+}
 const getAllTours = (req, res) => {
     res.status(200).json({
         status: "success",
@@ -16,16 +40,6 @@ const getAllTours = (req, res) => {
 const getTour = (req, res) => {
     const { id } = req.params;
     const tour = tours.find(el => el._id === id);
-
-
-
-    if (!tour) {
-        return res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        })
-    }
-
     res.status(200).json({
         status: "success",
         data: {
@@ -36,12 +50,12 @@ const getTour = (req, res) => {
 
 const createTour = (req, res) => {
 
-    if (!req.body.name || !req.body.price) {
-        return res.status(400).json({
-            status: "fail",
-            message: "Missing name or price"
-        })
-    }
+    // if (!req.body.name || !req.body.price) {
+    //     return res.status(400).json({
+    //         status: "fail",
+    //         message: "Missing name or price"
+    //     })
+    // }
 
     const newId = uuid.v4();
     const newTour = Object.assign({ id: newId }, req.body);
@@ -86,5 +100,7 @@ module.exports = {
     getTour,
     createTour,
     updateTour,
-    deleteTour
+    deleteTour,
+    checkId,
+    checkBody
 }
