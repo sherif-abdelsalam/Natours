@@ -1,45 +1,19 @@
-// const fs = require('fs');
-// const uuid = require('uuid');
-
 const Tour = require("../models/tourModels");
+const APIFeatures = require("../utils/apiFeatures");
 
-// const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours.json`));
+const aliasTopTours = (req, res, next) => {
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+    next();
+}
 
 
-// const checkId = (req, res, next, val) => {
-//     console.log(val);
-//     console.log('-------------------------');
-//     const { id } = req.params;
-//     const tour = tours.find(el => el._id === id);
-//     if (!tour) {
-//         return res.status(404).json({
-//             status: "fail",
-//             message: "Invalid ID"
-//         })
-//     }
-//     next();
-// }
-
-// const checkBody = (req, res, next) => {
-//     if (!req.body.name || !req.body.price) {
-//         return res.status(400).json({
-//             status: "fail",
-//             message: "Missing name or price"
-//         })
-//     }
-//     next();
-// }
 const getAllTours = async (req, res) => {
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    const queryObj = { ...req.query };
-    excludeFields.forEach(el => delete queryObj[el]);
-
     try {
-        const query = Tour.find(queryObj);
-        console.log("------------------------------------------------")
-        console.log(query);
-
-        const tours = await query;
+        const features = new APIFeatures(Tour.find(), req.query);
+        features.filter().sort().limitFields().paginate();
+        const tours = await features.query;
         res.status(200).json({
             status: "success",
             results: tours.length,
@@ -48,6 +22,7 @@ const getAllTours = async (req, res) => {
             }
         });
     } catch (err) {
+        console.log(err);
         res.status(404).json({
             status: "fail",
             message: err
@@ -136,4 +111,5 @@ module.exports = {
     createTour,
     updateTour,
     deleteTour,
+    aliasTopTours
 }
