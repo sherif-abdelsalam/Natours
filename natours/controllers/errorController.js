@@ -48,6 +48,9 @@ const sendErrorProd = (err, res) => {
     }
 };
 
+const handleInvalidToken = () => new AppErrors("Invalid token! Please log in again!", 401);
+const handleExpiredToken = () => new AppErrors("Expired token! Please log in again!", 401);
+
 module.exports = (err, req, res, next) => {
     // console.log(err.stack);
 
@@ -62,6 +65,8 @@ module.exports = (err, req, res, next) => {
         if (error.name === 'CastError') error = handleCastErrorDB(error);
         if (error.code === 11000) error = handleDuplicateFieldsDB(error);
         if (error._message === 'Tour validation failed') error = handleValidationErrorDB(error);
+        if (error.name === "JsonWebTokenError") error = handleInvalidToken();
+        if (error.name === "TokenExpiredError") error = handleExpiredToken();
 
         sendErrorProd(error, res);
     }
