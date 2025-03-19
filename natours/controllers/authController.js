@@ -16,14 +16,24 @@ const signToken = id => {
 
 const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id);
+
+    const cookieOptions = {
+        expiresIn: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN),
+        httpOnly: true
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        cookieOptions.secure = true;
+    }
+
+    res.cookie('jwt', token, cookieOptions);
+
+    user.password = undefined;
+
     res.status(statusCode).json({
         status: 'success',
         token,
-        user: {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-        }
+        user
     });
 }
 
@@ -68,6 +78,7 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new AppErrors("You are not logged in, Please log in!", 401));
     }
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
         return next(new AppErrors("The user belonging to this token does no longer exist", 401));
