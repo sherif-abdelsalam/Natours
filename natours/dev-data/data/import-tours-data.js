@@ -8,14 +8,14 @@ const DB = process.env.DATABASE;
 
 mongoose
     .connect(DB)
-    .then(() => {
-        console.log("DB connection successful!");
+    .catch((err) => {
+        console.log(err);
     });
 
 
 
 const tours = JSON.parse(
-    fs.readFileSync(`${__dirname}/tours-simple.json`, "utf-8")
+    fs.readFileSync(`${__dirname}/tours.json`, "utf-8")
 );
 
 const importData = async () => {
@@ -39,7 +39,7 @@ const deleteData = async () => {
 };
 
 // run this script 
-//   
+// dirname + script name (import or delete)
 if (process.argv[2] === "--import") {
     importData();
 } else if (process.argv[2] === "--delete") {

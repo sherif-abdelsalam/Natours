@@ -6,7 +6,6 @@ const crypto = require("crypto");
 const User = require("../models/userModel");
 const AppErrors = require("../utils/appErrors");
 const { sendEmailWithToken } = require("../utils/email");
-const { send } = require("process");
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,7 +13,7 @@ const signToken = id => {
     });
 }
 
-const createSendToken = (user, statusCode, res) => {
+const sendResWithTokenCookie = (user, statusCode, res) => {
     const token = signToken(user._id);
 
     const cookieOptions = {
@@ -39,7 +38,7 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
 
-    // this is the right way for inserting new user in the database to avoid any hijacks
+    // this is the right way for inserting new   in the database to avoid any hijacks
     // const newUser = await User.create({
     //     // name: req.body.name,
     //     // email: req.body.email,
@@ -50,7 +49,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     // });
 
     const newUser = await User.create(req.body);
-    createSendToken(newUser, 201, res);
+    sendResWithTokenCookie(newUser, 201, res);
 
 });
 
@@ -65,7 +64,7 @@ exports.login = catchAsync(async (req, res, next) => {
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppErrors('Incorrect email or password', 401));
     }
-    createSendToken(user, 200, res);
+    sendResWithTokenCookie(user, 200, res);
 });
 
 
@@ -78,7 +77,7 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new AppErrors("You are not logged in, Please log in!", 401));
     }
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    
+
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
         return next(new AppErrors("The user belonging to this token does no longer exist", 401));
@@ -163,7 +162,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     await user.save();
 
     //4) Log the user in, send JWT
-    createSendToken(user, 200, res);
+    sendResWithTokenCookie(user, 200, res);
 
 });
 
@@ -185,6 +184,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     await user.save();
 
     //4) Log user in, send JWT
-    createSendToken(user, 200, res);
+    sendResWithTokenCookie(user, 200, res);
 
 });

@@ -18,7 +18,11 @@ const getAllTours = catchAsync(async (req, res) => {
         .sort()
         .limitFields()
         .paginate();
+
     const tours = await features.query;
+
+    console.log(tours.length);
+
     res.status(200).json({
         status: "success",
         results: tours.length,
@@ -29,8 +33,7 @@ const getAllTours = catchAsync(async (req, res) => {
 });
 
 const getTour = catchAsync(async (req, res, next) => {
-    const { id } = req.params;
-    const tour = await Tour.findById(id);
+    const tour = await Tour.findById(req.params.id).populate('reviews');
     if (!tour) {
         return next(new AppErrors('No tour found with that ID', 404));
     }
