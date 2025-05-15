@@ -11,6 +11,7 @@ const toursRouter = require('./routers/tourRouter');
 const usersRouter = require('./routers/userRouter');
 const reviewRouter = require('./routers/reviewRouter');
 const AppErrors = require('./utils/appErrors');
+
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
@@ -54,7 +55,7 @@ app.use(rateLimit({
 
 app.use(express.static(`${__dirname}/public`));
 
-app.use('/api/v1/tours', toursRouter);
+app.use('/', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {

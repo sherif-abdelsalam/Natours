@@ -65,7 +65,7 @@ const createUser = (req, res) => {
         message: "This route is not yet defined"
     });
 }
-
+6
 const updateUser = (req, res) => {
     res.status(500).json({
         status: "error",
