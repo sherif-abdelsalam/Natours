@@ -33,7 +33,9 @@ const getAllTours = catchAsync(async (req, res) => {
 });
 
 const getTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findById(req.params.id).populate('reviews');
+
+
+    const tour = await Tour.findById(req.params.id);
     if (!tour) {
         return next(new AppErrors('No tour found with that ID', 404));
     }
@@ -90,12 +92,12 @@ const getTourStats = catchAsync(async (req, res, next) => {
             $match: { ratingsAverage: { $gte: 4.5 } }
         },
         {
-            $group: {
-                _id: "$difficulty",
-                numTours: { $sum: 1 },
-                numRatings: { $sum: "$ratingsQuantity" },
-                avgRating: { $avg: "$ratingsAverage" },
-                avgPrice: { $avg: "$price" },
+            $group: {  // group by difficulty
+                _id: "$difficulty", // group by difficulty
+                numTours: { $sum: 1 }, // count number of tours in each difficulty
+                numRatings: { $sum: "$ratingsQuantity" }, // sum of ratingsQuantity field
+                avgRating: { $avg: "$ratingsAverage" }, // average of ratingsAverage field
+                avgPrice: { $avg: "$price" }, // average of price field
                 minPrice: { $min: "$price" },
                 maxPrice: { $max: "$price" }
             }
@@ -109,10 +111,10 @@ const getTourStats = catchAsync(async (req, res, next) => {
     })
 });
 const getMonthlyPlan = catchAsync(async (req, res, next) => {
-    const year = req.params.year * 1;
+    const year = req.params.year * 1; // *1 to convert to number
     const plan = await Tour.aggregate([
         {
-            $unwind: "$startDates" // 
+            $unwind: "$startDates" // deconstructs an array field from the input documents to output a document for each element
         },
         {
             $match: {
@@ -123,10 +125,10 @@ const getMonthlyPlan = catchAsync(async (req, res, next) => {
             }
         },
         {
-            $group: {
-                _id: { $month: "$startDates" },
-                numTourStarts: { $sum: 1 },
-                tours: { $push: "$name" }
+            $group: { 
+                _id: { $month: "$startDates" }, // group by month
+                numTourStarts: { $sum: 1 }, // count number of tours starting in that month
+                tours: { $push: "$name" } // push tour names to an array
             }
         },
         {

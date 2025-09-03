@@ -3,6 +3,7 @@ const fs = require("fs");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const Tour = require("../../models/tourModels");
+const User = require("../../models/userModel");
 
 const DB = process.env.DATABASE;
 
@@ -14,13 +15,13 @@ mongoose
 
 
 
-const tours = JSON.parse(
-    fs.readFileSync(`${__dirname}/tours.json`, "utf-8")
+const users = JSON.parse(
+    fs.readFileSync(`${__dirname}/users.json`, "utf-8")
 );
 
 const importData = async () => {
     try {
-        await Tour.create(tours);
+        await User.create(users);
         console.log("Data successfully loaded!");
     } catch (err) {
         console.log(err);

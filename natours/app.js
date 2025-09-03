@@ -17,7 +17,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
 // set security HTTP headers like 
-app.use(helmet());
+app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
@@ -28,11 +28,23 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json({ limit: '10kb' }));
 
 // data sanitization against NoSQL query injection
+// removes $ and . from req.body, req.queryString and req.params
+// example: { "email": { "$gt": "" } } or { "email": { "$ne": "" } }
+// will be changed to { "email": { "gt": "" } } or { "email": { "ne": "" } }
 app.use(mongoSanitize());
 
 // data sanitization against XSS
+// cleans any user input from malicious HTML code
+// example: <script>...</script>
+// will be changed to &lt;script&gt;...&lt;/script&gt;
 app.use(xss());
 
+
+// prevent parameter pollution
+// example: ?duration=5&duration=9
+// will be changed to ?duration=9
+// but if you want to allow duplicates for some parameters, you can add them to the whitelist
+// 
 app.use(hpp({
     whitelist: [
         'duration',
@@ -53,9 +65,9 @@ app.use(rateLimit({
     message: 'Too many requests from this IP, please try again in an hour!'
 }));
 
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(`${__dirname}/public`)); // serving static files
 
-app.use('/', toursRouter);
+app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {
