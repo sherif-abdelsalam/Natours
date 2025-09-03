@@ -121,6 +121,21 @@ tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
 
+// Virtual populate 
+// it is not stored in the database, but it is calculated on the fly
+// why we need it?
+// because we want to get all reviews for a tour, but we don't want to store them in the tour document
+// instead, we can use virtual populate to get all reviews for a tour
+// ans this problem happens beccause we do a parent referencing (we store the tour id in the review document) so tour doesn't know about its reviews
+// but review knows about its tour 
+// so we can use virtual populate to get all reviews for a tour without storing them in the tour document
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id'
+});
+
+
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });

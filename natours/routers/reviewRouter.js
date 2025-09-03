@@ -10,7 +10,13 @@ router
     .post(
         authController.protect,
         authController.restrictTo('user'),
-        reviewController.createNewReview
+        reviewController.createReview
+    );
+router
+    .route('/:id')
+    .delete(authController.protect,
+        authController.restrictTo('user'),
+        reviewController.deleteReview
     );
 
 

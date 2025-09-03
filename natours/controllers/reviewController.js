@@ -13,8 +13,13 @@ const getAllReviews = catchAsync(async (req, res, next) => {
     })
 });
 
-const createNewReview = catchAsync(async (req, res, next) => {
-    const newReview = Review.create(req.body);
+const createReview = catchAsync(async (req, res, next) => {
+    // Allow nested routes
+    if (!req.body.tour) req.body.tour = req.params.tourId;
+    if (!req.body.user) req.body.user = req.user.id;
+
+    const newReview = await Review.create(req.body);
+
     res.status(201).json({
         status: "success",
         data: {
@@ -24,7 +29,16 @@ const createNewReview = catchAsync(async (req, res, next) => {
 
 });
 
+const deleteReview = catchAsync(async(req, res) => {
+    await Review.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
 module.exports = {
     getAllReviews,
-    createNewReview
+    createReview,
+    deleteReview
 }
