@@ -4,7 +4,17 @@ const router = express.Router();
 
 const tourController = require("../controllers/tourController");
 const authController = require("../controllers/authController");
-const reviewController = require("../controllers/reviewController");
+// const reviewController = require("../controllers/reviewController");
+const reviewRouter = require("./reviewRouter");
+
+
+// Nested route for reviews
+// POST /tour/234fad4/reviews
+// this route is handled by reviewRouter
+// so we need to use reviewRouter for this route    
+
+router.use("/:tourId/reviews", reviewRouter);
+
 
 router.route("/")
     .get(tourController.getAllTours)
@@ -26,12 +36,5 @@ router.route("/:id")
         authController.protect,
         authController.restrictTo("admin", "lead-guide"),
         tourController.deleteTour);
-
-
-router.route("/:tourId/reviews")
-    .post(
-        authController.protect,
-        authController.restrictTo("user"),
-        reviewController.createReview);
 
 module.exports = router;
