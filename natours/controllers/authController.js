@@ -151,8 +151,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     }
 
     //2) If token has not expired, and there is user, set the new password
+    console.log(req.body);
+    console.log(user);
     user.password = req.body.password;
-    user.confirmPassword = req.body.confirmPassword;
+    user.passwordConfirm = req.body.passwordConfirm;
 
     //3) Update changedPasswordAt property for the user
 
@@ -173,16 +175,18 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
     //1) Get user from collection
     const user = await User.findById(req.user.id).select('+password');
-    console.log(user);
 
     //2) Check if POSTed current password is correct
     if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
         return next(new AppErrors("Your current password is wrong", 401));
     }
 
+    console.log(req.body);
     //3) If so, update password
     user.password = req.body.password;
-    user.confirmPassword = req.body.confirmPassword;
+    user.passwordConfirm = req.body.passwordConfirm;
+
+    
     await user.save();
 
     //4) Log user in, send JWT
