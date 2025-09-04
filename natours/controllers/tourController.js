@@ -50,16 +50,18 @@ const getTour = catchAsync(async (req, res, next) => {
     });
 });
 
-const createTour = catchAsync(async (req, res, next) => {
-    console.log(req.body);
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-        status: "success",
-        data: {
-            tour: newTour
-        }
-    });
-});
+// const createTour = catchAsync(async (req, res, next) => {
+//     console.log(req.body);
+//     const newTour = await Tour.create(req.body);
+//     res.status(201).json({
+//         status: "success",
+//         data: {
+//             tour: newTour
+//         }
+//     });
+// });
+
+const createTour = factory.createOne(Tour);
 
 const updateTour = factory.updateOne(Tour);
 
