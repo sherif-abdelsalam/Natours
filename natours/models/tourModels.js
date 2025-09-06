@@ -117,6 +117,16 @@ const tourSchema = new mongoose.Schema(
     }
 );
 
+
+// compound index
+// to make query faster when we query by price and ratingsAverage
+// 1 means ascending order, -1 means descending order
+// 
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+
+// single field index
+tourSchema.index({ slug: 1 });
+
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
@@ -180,6 +190,7 @@ tourSchema.pre(/^find/, function (next) {
     next();
 });
 
+// 
 tourSchema.post(/^find/, function (docs, next) {
     console.log(`Query took ${Date.now() - this.start} milliseconds!`);
     next();
