@@ -2,6 +2,7 @@ const morgan = require('morgan'); // http request logger
 const express = require('express'); // web framework
 const rateLimit = require('express-rate-limit'); // rate limiting 
 const helmet = require('helmet'); // security headers
+const {join} = require('path');
 
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -10,6 +11,7 @@ const hpp = require('hpp');
 const toursRouter = require('./routers/tourRouter');
 const usersRouter = require('./routers/userRouter');
 const reviewRouter = require('./routers/reviewRouter');
+const viewRouter = require('./routers/viewRouter');
 const AppErrors = require('./utils/appErrors');
 
 const globalErrorHandler = require('./controllers/errorController');
@@ -23,6 +25,15 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
+// steps to set up pug
+// - set the view engine to pug
+// - set the views directory
+// - create a pug file in the views directory
+// - render the pug file in a route
+
+app.set('view engine', 'pug');
+app.set('views', join(__dirname, 'views')); // default is /views
+app.use(express.static(join(__dirname, 'public')));
 
 
 app.use(express.json({ limit: '10kb' }));
@@ -65,8 +76,8 @@ app.use(rateLimit({
     message: 'Too many requests from this IP, please try again in an hour!'
 }));
 
-app.use(express.static(`${__dirname}/public`)); // serving static files
-
+// routes
+app.use('/', viewRouter);
 app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewRouter);
