@@ -1,8 +1,8 @@
-const morgan = require('morgan'); // http request logger 
+const morgan = require('morgan'); // http request logger
 const express = require('express'); // web framework
-const rateLimit = require('express-rate-limit'); // rate limiting 
+const rateLimit = require('express-rate-limit'); // rate limiting
 const helmet = require('helmet'); // security headers
-const {join} = require('path');
+const { join } = require('path');
 const cookieParser = require('cookie-parser');
 
 const mongoSanitize = require('express-mongo-sanitize');
@@ -19,11 +19,11 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
-// set security HTTP headers like 
+// set security HTTP headers like
 app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
 
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
+  app.use(morgan('dev'));
 }
 
 // steps to set up pug
@@ -36,14 +36,13 @@ app.set('view engine', 'pug');
 app.set('views', join(__dirname, 'views')); // default is /views
 app.use(express.static(join(__dirname, 'public')));
 
-
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
-app.use((req,res, next) => {
-    console.log(req.cookies);
-    next();
-});
+// app.use((req,res, next) => {
+//     console.log(req.cookies);
+//     next();
+// });
 
 // data sanitization against NoSQL query injection
 // removes $ and . from req.body, req.queryString and req.params
@@ -57,31 +56,33 @@ app.use(mongoSanitize());
 // will be changed to &lt;script&gt;...&lt;/script&gt;
 app.use(xss());
 
-
 // prevent parameter pollution
 // example: ?duration=5&duration=9
 // will be changed to ?duration=9
 // but if you want to allow duplicates for some parameters, you can add them to the whitelist
-// 
-app.use(hpp({
+//
+app.use(
+  hpp({
     whitelist: [
-        'duration',
-        'ratingsQuantity',
-        'ratingsAverage',
-        'maxGroupSize',
-        'difficulty',
-        'price'
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price'
     ]
-}));
+  })
+);
 
-
-app.use(rateLimit({
+app.use(
+  rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
     standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
     message: 'Too many requests from this IP, please try again in an hour!'
-}));
+  })
+);
 
 // routes
 app.use('/', viewRouter);
@@ -89,7 +90,7 @@ app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {
-    next(new AppErrors(`Can't find ${req.originalUrl} on this server!`, 404));
+  next(new AppErrors(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);
