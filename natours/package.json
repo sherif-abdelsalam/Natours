@@ -5,12 +5,16 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "watch:js": "parcel watch public/js/index.js --out-dir public/js --out-file bundle.js",
+    "build:js": "parcel build public/js/index.js --out-dir public/js --out-file bundle.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-mongo-sanitize": "^2.2.0",
@@ -33,6 +37,7 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
+    "parcel-bundler": "^1.12.5",
     "prettier": "^1.17.0"
   }
 }

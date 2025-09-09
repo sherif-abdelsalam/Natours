@@ -3,6 +3,7 @@ const express = require('express'); // web framework
 const rateLimit = require('express-rate-limit'); // rate limiting 
 const helmet = require('helmet'); // security headers
 const {join} = require('path');
+const cookieParser = require('cookie-parser');
 
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -37,6 +38,12 @@ app.use(express.static(join(__dirname, 'public')));
 
 
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
+
+app.use((req,res, next) => {
+    console.log(req.cookies);
+    next();
+});
 
 // data sanitization against NoSQL query injection
 // removes $ and . from req.body, req.queryString and req.params
