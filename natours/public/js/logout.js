@@ -7,8 +7,8 @@ export const logout = async () => {
     console.log(res);
 
     if (res.status == 'success') {
+      window.location.href = '/';
       showAlert('success', 'You Logged Out Successfully');
-      location.reload(true);
     }
   } catch (err) {
     console.log(err);

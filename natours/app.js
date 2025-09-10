@@ -36,7 +36,10 @@ app.set('view engine', 'pug');
 app.set('views', join(__dirname, 'views')); // default is /views
 app.use(express.static(join(__dirname, 'public')));
 
+// Body parser (reading data from body in req.body)
 app.use(express.json({ limit: '10kb' }));
+// this middleware used to parse data incoming from forms (actions)
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // app.use((req,res, next) => {

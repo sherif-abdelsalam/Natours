@@ -6756,8 +6756,8 @@ var logout = exports.logout = /*#__PURE__*/function () {
           res = _context.v;
           console.log(res);
           if (res.status == 'success') {
+            window.location.href = '/';
             (0, _alerts.showAlert)('success', 'You Logged Out Successfully');
-            location.reload(true);
           }
           _context.n = 4;
           break;
@@ -6954,7 +6954,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42769" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46425" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
