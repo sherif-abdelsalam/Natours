@@ -1,59 +1,90 @@
-const User = require("../models/userModel");
-const AppErrors = require("../utils/appErrors");
-const catchAsync = require("../utils/catchAsync");
-const factory = require("./handlerFactory");
+const multer = require('multer');
 
+const User = require('../models/userModel');
+const AppErrors = require('../utils/appErrors');
+const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
+
+// Why do we need Multer?
+// Normally, Express doesn’t understand file uploads by itself because files are sent as binary data in HTTP requests.
+// Multer:
+// - Parses the incoming request.
+// - Extracts the files.
+// - Stores them in memory or on disk (depending on your config).
+// - Adds the file(s) info to req.file or req.files, so you can work with them in your routes.
+const multerStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'public/img/users');
+  },
+  filename: function(req, file, cb) {
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  }
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppErrors('Not an image! Please upload only images!!'), false);
+  }
+};
+
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+const uploadUserPhoto = upload.single('photo');
 
 const filterObjBody = (obj, ...allowedFields) => {
-    const newObj = {};
-    Object.keys(obj).forEach(el => {
-        if (allowedFields.includes(el)) newObj[el] = obj[el];
-    });
-    return newObj;
-}
-
-
+  const newObj = {};
+  Object.keys(obj).forEach(el => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el];
+  });
+  return newObj;
+};
 
 const updateMe = catchAsync(async (req, res, next) => {
-    if (req.body.password || req.body.confirmPassword) {
-        return next(new AppErrors("This route is not for password updates. Please use /updatePassword", 400));
+  if (req.body.password || req.body.confirmPassword) {
+    return next(
+      new AppErrors(
+        'This route is not for password updates. Please use /updatePassword',
+        400
+      )
+    );
+  }
+
+  const filteredBody = filterObjBody(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
     }
-    
-    const filteredBody = filterObjBody(req.body, 'name', 'email');
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
-        new: true,
-        runValidators: true
-    });
-    
-    res.status(200).json({
-        status: "success",
-        data: {
-            user: updatedUser
-        }
-    });
+  });
 });
 
 const deleteMe = catchAsync(async (req, res, next) => {
-    await User.findByIdAndUpdate(req.user.id, { active: false });
-    res.status(204).json({
-        status: "success",
-        data: null
-    });
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
 });
 
-
-
 const createUser = (req, res) => {
-    res.status(500).json({
-        status: "error",
-        message: "This route is not defined. Please use /signup instead"
-    });
-}
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined. Please use /signup instead'
+  });
+};
 
 const getMe = (req, res, next) => {
-    req.params.id = req.user.id;
-    next();
-}
+  req.params.id = req.user.id;
+  next();
+};
 const getUser = factory.getOne(User);
 
 const getAllUsers = factory.getAll(User);
@@ -69,14 +100,14 @@ const updateUser = factory.updateOne(User);
 // Delete user is admin only
 const deleteUser = factory.deleteOne(User);
 
-
 module.exports = {
-    getAllUsers,
-    getUser,
-    createUser,
-    updateUser,
-    deleteUser,
-    updateMe,
-    deleteMe,
-    getMe
-}
+  getAllUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  updateMe,
+  deleteMe,
+  getMe,
+  uploadUserPhoto
+};

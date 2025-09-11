@@ -18,7 +18,12 @@ router.use(authController.protect);
 
 router.patch('/updatePassword', authController.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
-router.patch('/updateMe', userController.updateMe);
+// upload here will parse the icoming file into req.file (only 1 file)
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 // Restrict all routes after this middleware to admin only
