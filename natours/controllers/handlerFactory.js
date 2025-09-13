@@ -1,13 +1,13 @@
 const APIFeatures = require('../utils/apiFeatures');
 const AppErrors = require('../utils/appErrors');
 const catchAsync = require('../utils/catchAsync');
+const { client } = require('../utils/redisClient.js');
 
 // higher order functions
 // This file contains factory functions for CRUD operations
 // that can be reused for different models
 // factory functions take a Model as an argument and return a middleware function
 // that performs the desired operation on that Model
-
 exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
@@ -66,30 +66,73 @@ exports.getOne = (Model, popOptions) =>
     });
   });
 
-exports.getAll = Model =>
+// exports.getAll = Model =>
+//   catchAsync(async (req, res, next) => {
+//     // To allow for nested GET reviews on tour (hack)
+//     let filter = {};
+//     if (req.params.tourId) filter = { tour: req.params.tourId };
+
+//     // EXECUTE QUERY
+//     const features = new APIFeatures(Model.find(filter), req.query);
+//     features
+//       .filter()
+//       .sort()
+//       .limitFields()
+//       .paginate();
+
+//     // to get query execution details and statistics
+//     // const doc = await features.query.explain();
+//     const doc = await features.query;
+
+//     // SEND RESPONSE
+//     res.status(200).json({
+//       status: 'success',
+//       results: doc.length,
+//       data: {
+//         data: doc
+//       }
+//     });
+//   });
+
+exports.getAll = (Model, cacheKeyPrefix = '') =>
   catchAsync(async (req, res, next) => {
-    // To allow for nested GET reviews on tour (hack)
     let filter = {};
     if (req.params.tourId) filter = { tour: req.params.tourId };
 
-    // EXECUTE QUERY
-    const features = new APIFeatures(Model.find(filter), req.query);
-    features
+    // Generate a cache key (based on query + filter)
+    const cacheKey = `${cacheKeyPrefix}:${JSON.stringify({
+      filter,
+      query: req.query
+    })}`;
+
+    // 1️⃣ Check cache
+    const cached = await client.get(cacheKey);
+    if (cached) {
+      console.log('Serving from Redis Cache 🚀');
+      const doc = JSON.parse(cached);
+      return res.status(200).json({
+        status: 'success',
+        results: doc.length,
+        data: { data: doc }
+      });
+    }
+
+    // 2️⃣ Query DB (MongoDB)
+    const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
       .limitFields()
       .paginate();
 
-    // to get query execution details and statistics
-    // const doc = await features.query.explain();
     const doc = await features.query;
 
-    // SEND RESPONSE
+    // 3️⃣ Store in Redis (cache for 1 min, can change TTL)
+    await client.set(cacheKey, JSON.stringify(doc), { EX: 60 });
+
+    // 4️⃣ Send response
     res.status(200).json({
       status: 'success',
       results: doc.length,
-      data: {
-        data: doc
-      }
+      data: { data: doc }
     });
   });

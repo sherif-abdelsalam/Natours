@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit'); // rate limiting
 const helmet = require('helmet'); // security headers
 const { join } = require('path');
 const cookieParser = require('cookie-parser');
+const { connectRedis } = require('./utils/redisClient');
 
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -18,6 +19,10 @@ const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
+
+(async () => {
+  await connectRedis(); // make sure redis is ready before handling requests
+})();
 
 // set security HTTP headers like
 app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
