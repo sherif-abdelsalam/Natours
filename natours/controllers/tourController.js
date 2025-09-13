@@ -1,8 +1,57 @@
+const multer = require('multer');
+const sharp = require('sharp');
+
 const Tour = require('../models/tourModels');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 // const APIFeatures = require("../utils/apiFeatures");
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppErrors('Not an image! Please upload only images!!'), false);
+  }
+};
+
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+const uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 }
+]);
+
+const resizeTourImages = async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  // image cover it is like the user
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  req.body.images = [];
+  // multiple image []
+
+  await Promise.all(
+    req.files.images.map(async (image, i) => {
+      const imageName = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      await sharp(image.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${imageName}`);
+      req.body.images.push(imageName);
+    })
+  );
+  next();
+};
+
 const AppErrors = require('../utils/appErrors');
 
 const aliasTopTours = (req, res, next) => {
@@ -197,5 +246,7 @@ module.exports = {
   getTourStats,
   getMonthlyPlan,
   getToursWithin,
-  getDistances
+  getDistances,
+  uploadTourImages,
+  resizeTourImages
 };
