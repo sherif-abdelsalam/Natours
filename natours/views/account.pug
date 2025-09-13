@@ -37,7 +37,8 @@ block content
               input#email.form__input(type='email', value=`${user.email}`, required)
             .form__group.form__photo-upload
               img.form__user-photo(src=`/img/users/${user.photo}`, alt='User photo')
-              a.btn-text(href='') Choose new photo
+              input#photo(type="file" name="photo" accept="image/*" style="display:none")
+              label(for="photo").btn-text Choose new photo
             .form__group.right
               button.btn.btn--small.btn--green(type='submit') Save settings
         .line &nbsp;

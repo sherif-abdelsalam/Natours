@@ -1,4 +1,5 @@
 const multer = require('multer');
+const sharp = require('sharp');
 
 const User = require('../models/userModel');
 const AppErrors = require('../utils/appErrors');
@@ -12,15 +13,27 @@ const factory = require('./handlerFactory');
 // - Extracts the files.
 // - Stores them in memory or on disk (depending on your config).
 // - Adds the file(s) info to req.file or req.files, so you can work with them in your routes.
-const multerStorage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, 'public/img/users');
-  },
-  filename: function(req, file, cb) {
-    const ext = file.mimetype.split('/')[1];
-    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-  }
-});
+
+//----------------Disk Storage Example -------------------
+//
+// const multerStorage = multer.diskStorage({
+//   destination: function(req, file, cb) {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: function(req, file, cb) {
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   }
+// });
+
+// ⚡ Typical real-world workflow (recommended):
+
+// - Use memoryStorage.
+// - Process file with Sharp.
+// - Upload to cloud storage.
+// - Store only the cloud URL in your database.
+
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
@@ -32,6 +45,20 @@ const multerFilter = (req, file, cb) => {
 
 const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 const uploadUserPhoto = upload.single('photo');
+
+const resizeUserPhoto = async (req, res, next) => {
+  if (!req.file) return next();
+  console.log('file', req.file);
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+  await sharp(req.file.buffer)
+    .resize(500, 500) //
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
 
 const filterObjBody = (obj, ...allowedFields) => {
   const newObj = {};
@@ -109,5 +136,6 @@ module.exports = {
   updateMe,
   deleteMe,
   getMe,
-  uploadUserPhoto
+  uploadUserPhoto,
+  resizeUserPhoto
 };
