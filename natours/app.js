@@ -14,6 +14,7 @@ const toursRouter = require('./routers/tourRouter');
 const usersRouter = require('./routers/userRouter');
 const reviewRouter = require('./routers/reviewRouter');
 const viewRouter = require('./routers/viewRouter');
+const bookingRouter = require('./routers/bookingRouter');
 const AppErrors = require('./utils/appErrors');
 
 const globalErrorHandler = require('./controllers/errorController');
@@ -25,7 +26,20 @@ const app = express();
 })();
 
 // set security HTTP headers like
-app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
+// app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://js.stripe.com'],
+      frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com'],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https://*.stripe.com'],
+      connectSrc: ["'self'", 'https://api.stripe.com']
+    }
+  })
+);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -97,6 +111,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 app.all('*', (req, res, next) => {
   next(new AppErrors(`Can't find ${req.originalUrl} on this server!`, 404));
 });
