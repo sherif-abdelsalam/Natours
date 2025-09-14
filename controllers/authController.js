@@ -203,8 +203,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   }
 
   //2) If token has not expired, and there is user, set the new password
-  console.log(req.body);
-  console.log(user);
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
 
@@ -230,7 +228,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     return next(new AppErrors('Your current password is wrong', 401));
   }
 
-  console.log(req.body);
   //3) If so, update password
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;

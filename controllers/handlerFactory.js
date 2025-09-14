@@ -108,7 +108,6 @@ exports.getAll = (Model, cacheKeyPrefix = '') =>
     // 1️⃣ Check cache
     const cached = await client.get(cacheKey);
     if (cached) {
-      console.log('Serving from Redis Cache 🚀');
       const doc = JSON.parse(cached);
       return res.status(200).json({
         status: 'success',

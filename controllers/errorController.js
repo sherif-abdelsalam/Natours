@@ -28,7 +28,7 @@ const sendErrorDev = (err, req, res) => {
     });
   }
   // Renderd pages
-  console.log(err);
+  console.error(err);
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong',
     msg: err.message

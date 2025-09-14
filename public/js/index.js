@@ -59,11 +59,9 @@ if (userPasswordForm)
   });
 
 if (bookTourBt) {
-  console.log('sd;fjd');
   bookTourBt.addEventListener('click', async e => {
     document.getElementById('book-tour').textContent = 'Proceessing...';
     const { tourId } = bookTourBt.dataset;
-    console.log(tourId);
     await bookTour(tourId);
   });
 }

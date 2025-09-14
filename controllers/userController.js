@@ -48,7 +48,6 @@ const uploadUserPhoto = upload.single('photo');
 
 const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
-  console.log('file', req.file);
 
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
   await sharp(req.file.buffer)

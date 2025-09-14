@@ -1,5 +1,5 @@
 require('dotenv').config();
-
+const { connectRedis } = require('./utils/redisClient');
 const mongoose = require('mongoose');
 const app = require('./app');
 const DB = process.env.DATABASE;
@@ -7,6 +7,7 @@ const DB = process.env.DATABASE;
 mongoose.connect(DB).then(() => {
   console.log('✅ DB connection successful!');
 });
+connectRedis();
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
