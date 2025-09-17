@@ -20,22 +20,12 @@ const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
+app.enable('trust proxy');
 
 // set security HTTP headers like
 // app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
 
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://js.stripe.com'],
-      frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com'],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https://*.stripe.com'],
-      connectSrc: ["'self'", 'https://api.stripe.com']
-    }
-  })
-);
+app.use(helmet());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));

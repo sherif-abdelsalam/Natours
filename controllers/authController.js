@@ -17,16 +17,15 @@ const signToken = id => {
 const sendResWithTokenCookie = (user, statusCode, res) => {
   const token = signToken(user._id);
 
-  const cookieOptions = {
-    expiresIn: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN),
-    httpOnly: true
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.secure = true;
-  }
-
-  res.cookie('jwt', token, cookieOptions);
+  res.cookie('jwt', token, {
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN),
+    httpOnly: true,
+    sameSite: 'strict',
+    secure:
+      process.env.NODE_ENV === 'production' ||
+      req.secure ||
+      req.headers['x-forwarded-proto'] === 'https'
+  });
 
   user.password = undefined;
 

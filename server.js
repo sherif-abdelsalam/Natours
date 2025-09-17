@@ -24,3 +24,10 @@ process.on('unhandledRejection', err => {
 process.on('uncaughtException', err => {
   console.log(err.name, '== ' + err.message);
 });
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Cleaning up...');
+  server.close(() => {
+    console.log('Server closed.');
+  });
+});
