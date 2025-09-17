@@ -52,12 +52,12 @@ app.use(cors()); // wo
 
 // app.options('*', cors()); for prefilieght requestes  but the above works fine for it
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// if (process.env.NODE_ENV === 'development') {
+//   app.use(morgan('dev'));
+// }
 
-app.post(
-  'webhook-checkout',
+app.get(
+  '/webhook-checkout',
   express.raw({ type: 'application/json' }),
   bookingController.webhookCheckout
 );
