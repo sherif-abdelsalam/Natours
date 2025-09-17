@@ -56,7 +56,7 @@ app.use(cors()); // wo
 //   app.use(morgan('dev'));
 // }
 
-app.get(
+app.post(
   '/webhook-checkout',
   express.raw({ type: 'application/json' }),
   bookingController.webhookCheckout
