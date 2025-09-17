@@ -26,7 +26,11 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
           product_data: {
             name: `${tour.name} Tour`,
             description: tour.summary,
-            images: [`https://www.natours.dev/img/tours/${tour.imageCover}`]
+            images: [
+              `${req.protocol}://${req.get('host')}/img/tours/${
+                tour.imageCover
+              }`
+            ]
           }
         },
         quantity: 1
@@ -74,15 +78,9 @@ exports.webhookCheckout = async (req, res) => {
   }
 
   // Handle the event
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const session = event.data.object;
-      await createBookingCheckout(session);
-
-      break;
-    default:
-      // Unexpected event type
-      console.log(`Unhandled event type ${event.type}.`);
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    createBookingCheckout(session);
   }
 
   // Return a 200 response to acknowledge receipt of the event
