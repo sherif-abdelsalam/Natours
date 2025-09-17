@@ -20,7 +20,7 @@ const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
-app.enable('trust proxy');
+app.enable('trust proxy', 1);
 
 // set security HTTP headers like
 // app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
