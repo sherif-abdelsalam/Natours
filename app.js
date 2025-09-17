@@ -17,6 +17,7 @@ const reviewRouter = require('./routers/reviewRouter');
 const viewRouter = require('./routers/viewRouter');
 const bookingRouter = require('./routers/bookingRouter');
 const AppErrors = require('./utils/appErrors');
+const webhook = require('./controllers/webhookCheckout');
 
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -55,6 +56,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+app.post(
+  'webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  webhook.webhookCheckout
+);
 // steps to set up pug
 // - set the view engine to pug
 // - set the views directory
@@ -107,6 +113,7 @@ app.use(
 );
 
 app.use(
+  '/api',
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
