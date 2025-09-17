@@ -9,7 +9,7 @@ const setTourUserIds = (req, res, next) => {
   if (!req.body.user) req.body.user = req.user.id;
   next();
 };
-const getAllReviews = factory.getAll(Review, 'reviews');
+const getAllReviews = factory.getAll(Review);
 const createReview = factory.createOne(Review);
 const deleteReview = factory.deleteOne(Review);
 const updateReview = factory.updateOne(Review);

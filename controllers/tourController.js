@@ -61,7 +61,7 @@ const aliasTopTours = (req, res, next) => {
   next();
 };
 
-const getAllTours = factory.getAll(Tour, 'tours');
+const getAllTours = factory.getAll(Tour);
 
 const getTour = factory.getOne(Tour, { path: 'reviews' });
 

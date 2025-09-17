@@ -113,7 +113,7 @@ const getMe = (req, res, next) => {
 };
 const getUser = factory.getOne(User);
 
-const getAllUsers = factory.getAll(User, 'users');
+const getAllUsers = factory.getAll(User);
 
 // Do not update passwords with this!
 // because we are using findByIdAndUpdate which does not run pre save middleware
