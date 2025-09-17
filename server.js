@@ -4,7 +4,7 @@ const app = require('./app');
 const DB = process.env.DATABASE;
 
 mongoose.connect(DB).then(() => {
-  console.log('✅ DB connection successful!');
+  console.log('✅ DB connected successful!');
 });
 
 const port = process.env.PORT || 5000;

@@ -16,8 +16,8 @@ const usersRouter = require('./routers/userRouter');
 const reviewRouter = require('./routers/reviewRouter');
 const viewRouter = require('./routers/viewRouter');
 const bookingRouter = require('./routers/bookingRouter');
+const bookingController = require('./controllers/bookingController');
 const AppErrors = require('./utils/appErrors');
-const webhook = require('./controllers/webhookCheckout');
 
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -59,7 +59,7 @@ if (process.env.NODE_ENV === 'development') {
 app.post(
   'webhook-checkout',
   express.raw({ type: 'application/json' }),
-  webhook.webhookCheckout
+  bookingController.webhookCheckout
 );
 // steps to set up pug
 // - set the view engine to pug
