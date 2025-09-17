@@ -20,12 +20,35 @@ const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
+
 app.enable('trust proxy', 1);
 
 // set security HTTP headers like
-// app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
+app.use(helmet()); // helps you secure your Express apps by setting various HTTP headers
 
-app.use(helmet());
+// ### 🌍 CORS Requests Summary
+
+// **Simple Requests** (no preflight):
+// * Methods: `GET`, `POST`, `HEAD`
+// * Headers: only `Accept`, `Accept-Language`, `Content-Language`, `Content-Type` (must be `text/plain`, `multipart/form-data`, or `application/x-www-form-urlencoded`)
+// * No custom headers
+// * No cookies/auth unless explicitly allowed
+
+// **Non-Simple Requests** (require preflight `OPTIONS`):
+// * Methods: `PUT`, `PATCH`, `DELETE`, etc.
+// * Custom headers (e.g. `Authorization`, `X-Custom-*`)
+// * `Content-Type: application/json`
+// * Cross-origin cookies
+
+// **Rule of thumb**:
+
+// * ✅ Simple → sent directly
+// * ⚠️ Non-simple → browser sends preflight to ask permission
+
+// set the header -> Access-Control-Allow-Origin *
+app.use(cors()); // wo
+
+// app.options('*', cors()); for prefilieght requestes  but the above works fine for it
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
