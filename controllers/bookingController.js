@@ -1,6 +1,7 @@
 const factory = require('../controllers/handlerFactory');
 const Tour = require('../models/tourModels');
 const Booking = require('../models/bookingModel');
+const User = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -49,13 +50,6 @@ exports.getAllBookings = factory.getAll(Booking);
 exports.updateBooking = factory.updateOne(Booking);
 exports.deleteBooking = factory.deleteOne(Booking);
 
-const createBookingCheckout = catchAsync(async session => {
-  const tour = session.client_reference_id;
-  const user = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.amount_total / 100;
-  await Booking.create({ tour, user, price });
-});
-
 exports.webhookCheckout = async (req, res) => {
   let event = req.body;
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -77,7 +71,10 @@ exports.webhookCheckout = async (req, res) => {
   // Handle the event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    createBookingCheckout(session);
+    const tour = session.client_reference_id;
+    const user = (await User.findOne({ email: session.customer_email })).id;
+    const price = session.amount_total / 100;
+    await Booking.create({ tour, user, price });
   }
 
   // Return a 200 response to acknowledge receipt of the event
