@@ -20,7 +20,7 @@ const sendResWithTokenCookie = (user, statusCode, req, res) => {
   res.cookie('jwt', token, {
     expiresIn: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN),
     httpOnly: true,
-    sameSite: 'strict',
+    // sameSite: 'strict',
     secure:
       process.env.NODE_ENV === 'production' ||
       req.secure ||
