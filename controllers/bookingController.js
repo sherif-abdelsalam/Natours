@@ -71,15 +71,13 @@ exports.webhookCheckout = async (req, res) => {
   // Handle the event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const tour = session.client_reference_id;
-    const user = (await User.findOne({ email: session.customer_email })).id;
-    const price = session.amount_total / 100;
-    console.log(tour);
-    console.log(user);
-    console.log(price);
-    await Booking.create({ tour, user, price });
+    const user = await User.findOne({ email: session.customer_email });
+    await Booking.create({
+      tour: session.client_reference_id,
+      user: user.id,
+      price: session.amount_total / 100
+    });
   }
-
   // Return a 200 response to acknowledge receipt of the event
   res.status(200).json({
     recieved: true
